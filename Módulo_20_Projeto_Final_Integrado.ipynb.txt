@@ -1,0 +1,204 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ygBMRcUsdUTh",
+        "outputId": "993b3069-761b-4890-f100-c3f0a40ed256"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "--- Dados Iniciais Carregados com Sucesso! ---\n"
+          ]
+        }
+      ],
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "\n",
+        "# Base de Produção - Linha A\n",
+        "df_linha_A = pd.DataFrame({\n",
+        "    'Lote_ID': [5001, 5002, 5003],\n",
+        "    'Cod_Eqp': ['EQ-101', 'EQ-102', 'EQ-101'],\n",
+        "    'Data_Inicio': ['2026-09-23 08:00:00', '2026-09-23 08:30:00', '2026-09-23 09:15:00'],\n",
+        "    'Data_Fim': ['2026-09-23 08:50:00', '2026-09-23 09:40:00', '2026-09-23 09:45:00'],\n",
+        "    'Pecas_Boas': [480, 510, 290],\n",
+        "    'Pecas_Refugadas': [20, 40, 10]\n",
+        "})\n",
+        "\n",
+        "# Base de Produção - Linha B\n",
+        "df_linha_B = pd.DataFrame({\n",
+        "    'Lote_ID': [5004, 5005],\n",
+        "    'Cod_Eqp': ['EQ-103', 'EQ-102'],\n",
+        "    'Data_Inicio': ['2026-09-23 08:00:00', '2026-09-23 10:00:00'],\n",
+        "    'Data_Fim': ['2026-09-23 09:10:00', '2026-09-23 11:20:00'],\n",
+        "    'Pecas_Boas': [600, 450],\n",
+        "    'Pecas_Refugadas': [15, 50]\n",
+        "})\n",
+        "\n",
+        "# Cadastro de Equipamentos\n",
+        "df_cadastro_eqp = pd.DataFrame({\n",
+        "    'TAG': ['EQ-101', 'EQ-102', 'EQ-103'],\n",
+        "    'Setor': ['Estamparia', 'Funilaria', 'Pintura']\n",
+        "})\n",
+        "\n",
+        "print(\"--- Dados Iniciais Carregados com Sucesso! ---\")\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 1 Empilhando 2 tabelas uma encima da outra, ignore_index=True serve pra manter os indices , 0, 1, 2, 3, 4\n",
+        "df_bruto = pd.concat([df_linha_A, df_linha_B], ignore_index=True)\n",
+        "print(\"\\n --- Dia Completo ---\")\n",
+        "print(df_bruto)\n",
+        "\n",
+        "# 2 Chaves com nomes diferentes nas tabelas tabela A 'Cod_Eqp' tabela B 'TAG'\n",
+        "df_consolidado = pd.merge(df_bruto, df_cadastro_eqp, left_on='Cod_Eqp', right_on='TAG', how='left')\n",
+        "print(\"\\n--- Tabela Consolidada ---\")\n",
+        "print(df_consolidado)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "lqMYCtV8d8gN",
+        "outputId": "80b18eed-b90d-4b03-ae1b-b0d06d262338"
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\n",
+            " --- Dia Completo ---\n",
+            "   Lote_ID Cod_Eqp          Data_Inicio             Data_Fim  Pecas_Boas  \\\n",
+            "0     5001  EQ-101  2026-09-23 08:00:00  2026-09-23 08:50:00         480   \n",
+            "1     5002  EQ-102  2026-09-23 08:30:00  2026-09-23 09:40:00         510   \n",
+            "2     5003  EQ-101  2026-09-23 09:15:00  2026-09-23 09:45:00         290   \n",
+            "3     5004  EQ-103  2026-09-23 08:00:00  2026-09-23 09:10:00         600   \n",
+            "4     5005  EQ-102  2026-09-23 10:00:00  2026-09-23 11:20:00         450   \n",
+            "\n",
+            "   Pecas_Refugadas  \n",
+            "0               20  \n",
+            "1               40  \n",
+            "2               10  \n",
+            "3               15  \n",
+            "4               50  \n",
+            "\n",
+            "--- Tabela Consolidada ---\n",
+            "   Lote_ID Cod_Eqp          Data_Inicio             Data_Fim  Pecas_Boas  \\\n",
+            "0     5001  EQ-101  2026-09-23 08:00:00  2026-09-23 08:50:00         480   \n",
+            "1     5002  EQ-102  2026-09-23 08:30:00  2026-09-23 09:40:00         510   \n",
+            "2     5003  EQ-101  2026-09-23 09:15:00  2026-09-23 09:45:00         290   \n",
+            "3     5004  EQ-103  2026-09-23 08:00:00  2026-09-23 09:10:00         600   \n",
+            "4     5005  EQ-102  2026-09-23 10:00:00  2026-09-23 11:20:00         450   \n",
+            "\n",
+            "   Pecas_Refugadas     TAG       Setor  \n",
+            "0               20  EQ-101  Estamparia  \n",
+            "1               40  EQ-102   Funilaria  \n",
+            "2               10  EQ-101  Estamparia  \n",
+            "3               15  EQ-103     Pintura  \n",
+            "4               50  EQ-102   Funilaria  \n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 1. Conversao das datas na tabela consolidada\n",
+        "df_consolidado['Data_Inicio'] = pd.to_datetime(df_consolidado['Data_Inicio'])\n",
+        "df_consolidado['Data_Fim'] = pd.to_datetime(df_consolidado['Data_Fim'])\n",
+        "\n",
+        "# 2. Cálculo do tempo de operacão em minutos\n",
+        "df_consolidado['Tempo_Operacao_Min'] = (df_consolidado['Data_Fim'] - df_consolidado['Data_Inicio']).dt.total_seconds() /60\n",
+        "\n",
+        "# 3. Cálculo do Total Produzido e da Taxa de Refugo (%)\n",
+        "df_consolidado['Total_Produzido'] = df_consolidado['Pecas_Boas'] + df_consolidado['Pecas_Refugadas']\n",
+        "df_consolidado['Taxa_Refugo_%'] = (df_consolidado['Pecas_Refugadas'] / df_consolidado['Total_Produzido']) * 100\n",
+        "\n",
+        "# 4. Regra de Negócio (Status de Qualidade)\n",
+        "df_consolidado['Status_Qualidade'] = np.where(df_consolidado['Taxa_Refugo_%'] > 5.0, 'Reprovado', 'Aprovado')\n",
+        "\n",
+        "# 5. Exibicao do relatório limpo\n",
+        "print(df_consolidado[['Lote_ID', 'Setor', 'Tempo_Operacao_Min', 'Taxa_Refugo_%', 'Status_Qualidade']])\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "m3vnDBYjhBn3",
+        "outputId": "2e43a7aa-381f-425e-ef59-13d2396b10a9"
+      },
+      "execution_count": 12,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "   Lote_ID       Setor  Tempo_Operacao_Min  Taxa_Refugo_% Status_Qualidade\n",
+            "0     5001  Estamparia                50.0       4.000000         Aprovado\n",
+            "1     5002   Funilaria                70.0       7.272727        Reprovado\n",
+            "2     5003  Estamparia                30.0       3.333333         Aprovado\n",
+            "3     5004     Pintura                70.0       2.439024         Aprovado\n",
+            "4     5005   Funilaria                80.0      10.000000        Reprovado\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# 1 Gravando duas tabelas em um único arquivo Excel\n",
+        "with pd.ExcelWriter('Relatorio_Final_Planta.xlsx') as writer:\n",
+        "   df_consolidado.to_excel(writer, sheet_name='Base_Consolidada', index=False)\n",
+        "\n",
+        "   # 1.1 Filtrando apenas os reprovados para a gestão\n",
+        "   df_reprovados = df_consolidado[df_consolidado['Status_Qualidade'] == 'Reprovado']\n",
+        "   df_reprovados.to_excel(writer, sheet_name='Lotes_Reprovados', index=False)\n",
+        "\n",
+        "print(\"--- RELATÓRIO EXECUTIVO GERADO COM SUCESSO! ---\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "MHaUcr0xxswc",
+        "outputId": "711c511b-7e57-4e75-e814-8822ebe575b1"
+      },
+      "execution_count": 13,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "--- RELATÓRIO EXECUTIVO GERADO COM SUCESSO! ---\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
